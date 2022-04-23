@@ -28,13 +28,7 @@ ZINIT[ZCOMPDUMP_PATH]="$(safe_path $XDG_CACHE_HOME/zsh)/zcompdump-$ZSH_VERSION"
 source "$ZINIT_HOME/zinit.zsh"
 
 # -- ZSH PROMPT
-# zinit snippet "https://github.com/arcticicestudio/igloo/blob/master/snowblocks/zsh/lib/themes/igloo.zsh"
-source $XDG_CONFIG_HOME/zsh//config/prompt.zsh
-ZSH_PROMPT_ALWAYS_SHOW_USER=${IGLOO_ZSH_PROMPT_THEME_ALWAYS_SHOW_USER:-false}
-
-zinit snippet "https://github.com/git/git/blob/master/contrib/completion/git-prompt.sh"
-# GIT_PS1_SHOWCOLORHINTS=1                                              # Show color
-GIT_PS1_SHOWUPSTREAM="auto verbose"
+zinit light spaceship-prompt/spaceship-prompt
 
 # -- ZSH COMPLETION
 autoload -U compinit
