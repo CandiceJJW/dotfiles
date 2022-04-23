@@ -1,7 +1,6 @@
 [user]
-	name = Feiyou Guo
-	email = feiyouguo@gmail.com
-	singingKey = FAE2C5D9CDFDF7B003F92BF3A6B84D21C7A7D1FD
+  name = Junjin Wang
+  email = candiceeeeeeeeee@gmail.com
 [core]
 	editor = nvim
 	ignorecase = false
@@ -19,7 +18,5 @@
 	cmd = nvim -d \"$BASE\" \"$LOCAL\" \"$REMOTE\" \"$MERGED\"
 [tag]
 	forceSignAnnotated = true
-[commit]
-	gpgSign = true
 [gpg]
 	program = gpg
