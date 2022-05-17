@@ -1,61 +1,93 @@
-local plugin = {
-  "neovim/nvim-lspconfig"
-}
 
-plugin.config = function()
-  -- MARK: Diagnostic Settings
-  -- Diable virtual text
- vim.diagnostic.config({
-    virtual_text = false,
-    float = {
-      scope = "line",     -- "buffer", "line", or "cursor"
-      source = true,      -- true, "if_mnay", or false
+return {
+  "neovim/nvim-lspconfig",
+
+  config = function()
+    -- MARK: Diagnostic Settings: diable virtual text
+    vim.diagnostic.config({
+      virtual_text = false,
+      float = {
+        scope = "line", -- "buffer", "line", or "cursor"
+        source = true, -- true, "if_mnay", or false
+      }
+
+    })
+
+    -- MARK: Add boarder to hover --
+    local border = {
+      { "╭", "FloatBorder" },
+      { "─", "FloatBorder" },
+      { "╮", "FloatBorder" },
+      { "│", "FloatBorder" },
+      { "╯", "FloatBorder" },
+      { "─", "FloatBorder" },
+      { "╰", "FloatBorder" },
+      { "│", "FloatBorder" },
     }
 
-  })
+    local orig_util_open_floating_preview = vim.lsp.util.open_floating_preview
+    function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
+      opts = opts or {}
+      opts.border = opts.border or border
+      return orig_util_open_floating_preview(contents, syntax, opts, ...)
+    end
 
-  -- MARK: Change diagnostic symbol in signl column
-  -- local signs = { Error = " ", Warn = " ", Hint = " ", Info = " " }
-  local signs = { Error = " ", Warn = " ", Hint = " ", Info = " " }
-  for type, icon in pairs(signs) do
-    local hl = "DiagnosticSign" .. type
-    vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
-  end
-end
+    -- MARK: Change diagnostic symbol in signl column
+    -- local signs = { Error = " ", Warn = " ", Hint = " ", Info = " " }
+    local signs = { Error = " ", Warn = " ", Hint = " ", Info = " " }
+    for type, icon in pairs(signs) do
+      local hl = "DiagnosticSign" .. type
+      vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
+    end
 
-plugin.defer = function()
-  -- vim.schedule( function ()
+
+    -- MARK: Setup Servers
+    local utils = require("utils")
+    local lspconfig = require("lspconfig")
+
+    -- initialize servers
+    local servers = require("plugin/lsp/servers")
+    for server, server_config in pairs(servers) do
+      -- Setup common server configs
+      server_config.capabilities = utils.lsp.capabilities
+      lspconfig[server].setup(server_config)
+    end
+
+  end,
+
+
+  defer = function()
     -- MARK: Register and add to command_center
     local has_command_center, command_center = pcall(require, 'command_center')
     if not has_command_center then return end
 
-    local noremap = {noremap = true}
-    local silent_noremap = {noremap = true, silent = true}
+    local noremap = { noremap = true }
+    local silent_noremap = { noremap = true, silent = true }
 
     command_center.add({
       {
         description = "Show documentations (hover)",
-        command = "lua vim.lsp.buf.hover()",
+        cmd = vim.lsp.buf.hover,
         keybindings = { "n", "K", silent_noremap },
       }, {
         description = "Show errors of the current line",
-        command = "lua vim.diagnostic.open_float()",
+        cmd = vim.diagnostic.open_float,
         keybindings = { "n", "E", silent_noremap },
       }, {
         description = "Show function signature",
-        command = "lua vim.lsp.buf.signature_help()",
+        cmd = vim.lsp.buf.signature_help,
         keybindings = { "n", "<leader>sk", silent_noremap },
       }, {
         description = "Go to declarations",
-        command = "lua vim.lsp.buf.declaration()",
+        cmd = vim.lsp.buf.declaration,
         keybindings = { "n", "<leader>sD", silent_noremap },
       }, {
         description = "Rename symbol",
-        command = "lua vim.lsp.buf.rename()",
+        cmd = vim.lsp.buf.rename,
         keybindings = { "n", "<leader>sn", silent_noremap },
       }, {
         description = "Format code (lint)",
-        command = "lua vim.lsp.buf.formatting()",
+        cmd = vim.lsp.buf.formatting,
         keybindings = { "n", "<leader>sf", silent_noremap },
       }
     })
@@ -64,105 +96,40 @@ plugin.defer = function()
     command_center.add({
       {
         description = "Show code actions",
-        command = "Telescope lsp_code_actions",
+        cmd = vim.lsp.buf.code_action,
         keybindings = { "n", "<leader>sa", noremap },
-      },{
-        description = "Show range code actions",
-        command = "Telescope lsp_range_code_actions",
-        keybindings = { "v", "<leader>sa", noremap },
-      },{
+      }, {
         description = "Go to definitions",
-        command = "Telescope lsp_definitions",
+        cmd = "<CMD>Telescope lsp_definitions<CR>",
         keybindings = { "n", "<leader>sd", noremap },
-      },{
+      }, {
         description = "Go to type definitions",
-        command = "Telescope lsp_type_definitions",
+        cmd = "<CMD>Telescope lsp_type_definitions<CR>",
         keybindings = { "n", "<leader>st", noremap },
-      },{
+      }, {
         description = "Show all references",
-        command = "Telescope lsp_references",
+        cmd = "<CMD>Telescope lsp_references<CR>",
         keybindings = { "n", "<leader>sr", noremap },
-      },{
+      }, {
         description = "Show workspace errors (diagnostic)",
-        command = "Telescope diagnostics",
+        cmd = "<CMD>Telescope diagnostics<CR>",
         keybindings = { "n", "<leader>se", noremap },
-      },{
+      }, {
         description = "Go to implementations",
-        command = "Telescope lsp_implementations",
+        cmd = "<CMD>Telescope lsp_implementations<CR>",
         keybindings = { "n", "<leader>si", noremap },
-      },{
+      }, {
         description = "Show document symbols",
-        command = "Telescope lsp_document_symbols",
+        cmd = "<CMD>Telescope lsp_document_symbols<CR>",
         keybindings = {
-          {"n", "<leader>ss", noremap },
-          {"n", "<leader>ssd", noremap },
+          { "n", "<leader>ss", noremap },
+          { "n", "<leader>ssd", noremap },
         },
-      },{
+      }, {
         description = "show workspace symbols",
-        command = "Telescope lsp_dynamic_workspace_symbols",
+        cmd = "<CMD>Telescope lsp_dynamic_workspace_symbols<CR>",
         keybindings = { "n", "<leader>ssw", noremap },
       }
     })
-  -- end )
-end
-
-return plugin
-
-
--- return {
---   -- Plugin name
---   "neovim/nvim-lspconfig",
---
---   config = function()
---
---     -- MARK: Diagnostic Settings
---     -- Diable virtual text
---     vim.diagnostic.config({
---       virtual_text = false,
---       float = {
---         scope = "line",     -- "buffer", "line", or "cursor"
---         source = true,      -- true, "if_mnay", or false
---       }
---
---     })
---
---     -- MARK: Change diagnostic symbol in signl column
---     -- local signs = { Error = " ", Warn = " ", Hint = " ", Info = " " }
---     local signs = { Error = " ", Warn = " ", Hint = " ", Info = " " }
---     for type, icon in pairs(signs) do
---       local hl = "DiagnosticSign" .. type
---       vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
---     end
---
---   end
--- }
-
-
-
-
--- -- MARK: Diagnostic Settings
--- -- Diable virtual text
--- vim.diagnostic.config({
---   virtual_text = false,
---   float = {
---     scope = "line",     -- "buffer", "line", or "cursor"
---     source = true,      -- true, "if_mnay", or false
---   }
---
--- })
-
--- Show diagnostic on the current line in a floating window
--- vim.diagnostic.open_float({
---   scope = "line",     -- "buffer", "line", or "cursor"
---   source = true,      -- true, "if_mnay", or false
---   prefix = "",
--- })
-
--- ---- MARK: Change diagnostic symbol in signl column
--- -- local signs = { Error = " ", Warn = " ", Hint = " ", Info = " " }
--- local signs = { Error = " ", Warn = " ", Hint = " ", Info = " " }
--- for type, icon in pairs(signs) do
---   local hl = "DiagnosticSign" .. type
---   vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
--- end
-
+  end
+}
