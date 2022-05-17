@@ -1,159 +1,146 @@
 local M = {
   'nvim-telescope/telescope.nvim',
-  -- requires = {
-    -- 'nvim-lua/plenary.nvim'
-  -- }
 
-}
+  config = function()
+    local telescope = require('telescope')
+    local actions = require('telescope.actions')
 
-M.config = function()
-  local telescope = require('telescope')
-  local actions = require('telescope.actions')
+    telescope.setup {
+      defaults = {
+        layout_strategy = 'flex',
 
-  telescope.setup {
-    defaults = {
-      layout_strategy = 'flex',
+        mappings = {
+          n = {
+            ["q"] = actions.close,
+            ["<Esc>"] = actions.close,
+            ["<C-n>"] = actions.move_selection_next,
+            ["<C-p>"] = actions.move_selection_previous,
+            ["<C-f>"] = actions.preview_scrolling_up,
+            ["<C-b>"] = actions.preview_scrolling_down,
+          },
 
-      mappings = {
-        n = {
-          ["q"] = actions.close,
-          ["<Esc>"] = actions.close,
-          ["<C-n>"] = actions.move_selection_next,
-          ["<C-p>"] = actions.move_selection_previous,
-          ["<C-f>"] = actions.preview_scrolling_up,
-          ["<C-b>"] = actions.preview_scrolling_down,
+          i = {
+            ["<Esc>"] = actions.close,
+            ["<C-u>"] = false, -- Clear the prompt
+            ["<C-s>"] = actions.select_horizontal,
+            ["<C-f>"] = actions.preview_scrolling_up,
+            ["<C-b>"] = actions.preview_scrolling_down,
+          }
         },
 
-        i = {
-          ["<Esc>"] = actions.close,
-          ["<C-u>"] = false, -- Clear the prompt
-          ["<C-s>"] = actions.select_horizontal,
-          ["<C-f>"] = actions.preview_scrolling_up,
-          ["<C-b>"] = actions.preview_scrolling_down,
-        }
+        file_ignore_patterns = {
+          "node_modules",
+        },
       },
 
-      file_ignore_patterns = {
-        "node_modules",
+      pickers = {
+        lsp_code_actions = {
+          theme = "cursor",
+        },
       },
-    },
-
-    pickers = {
-      lsp_code_actions = {
-        theme = "cursor",
-      },
-    },
-  }
-end
-
-M.defer = function()
-  -- MARK: Register and add to command_center
-  local has_command_center, command_center = pcall(require, 'command_center')
-  if not has_command_center then return end
-
-  local noremap = {noremap = true}
-  local silent_noremap = {noremap = true, silent = true}
-
-  -- File Pickers
-  command_center.add({
-    {
-      description = "Find files",
-      command = "Telescope find_files",
-      keybindings = { "n", "<leader>ff", noremap },
-    }, {
-      description = "Find hidden files",
-      command = "Telescope find_files hidden=true",
-    }, {
-      description = "Search within the project (Live grep)",
-      command = "Telescope live_grep",
-      keybindings = { "n", "<leader>fg", noremap },
     }
-  })
+  end,
 
-  -- Vim Pickers
-  command_center.add({
-    {
-      description = "Find help documentations",
-      command = "Telescope help_tags",
-      keybindings = { "n", "<leader>fh", noremap },
-    }, {
-      description = "Show opened buffers",
-      command = "Telescope buffers",
-      keybindings = { "n", "<leader>fb", noremap },
-    }, {
-      description = "Find man pages",
-      command = "Telescope man_pages",
-      keybindings = { "n", "<leader>fm", noremap },
-    }, {
-      description = "Show all key maps",
-      command = "Telescope keymaps",
-      keybindings = { "n", "<leader>fk", noremap },
-    }, {
-      description = "Search inside current buffer",
-      command = "Telescope current_buffer_fuzzy_find",
-      keybindings = { "n", "<leader>fl", noremap },
-    }, {
-      description = "Show registers",
-      command = "Telescope registers",
-      keybindings = { "n", "<leader>fr", noremap },
-    }, {
-      description = "Show recent files",
-      command = "Telescope oldfiles",
-    }, {
-      description = "Show all available commands",
-      command = "Telescope commands",
-    }, {
-      description = "Show command history",
-      command = "Telescope commands",
-    }, {
-      description = "Show search history (vimgrep)",
-      command = "Telescope commands",
-    }, {
-      description = "Switch colorschemes",
-      command = "Telescope colorscheme",
-    }, {
-      description = "Show jumplist",
-      command = "Telescope jumplist",
-    }, {
-      description = "Edit vim options",
-      command = "Telescope vim_options",
-    }, {
-      description = "List all autocommands",
-      command = "Telescope autocommands",
-    }, {
-      description = "Find telescope builtin commands",
-      command = "Telescope builtin",
-    }
-  })
+  defer = function()
+    -- MARK: Register and add to command_center
+    local has_command_center, command_center = pcall(require, 'command_center')
+    if not has_command_center then return end
 
-  -- Git Pickers
-  command_center.add({
-    {
-      description = "Show workspace git commits",
-      command = "Telescope git_commits",
-    }, {
-      description = "Show git commits of current file",
-      command = "Telescope git_bcommits",
-    }, {
-      description = "Show git status",
-      command = "Telescope git_status",
-    }, {
-      description = "Show git branches",
-      command = "Telescope ",
-    }, {
-      description = "Show git stash",
-      command = "Telescope git_stash",
-    }
-  })
+    local noremap = { noremap = true }
 
-  -- Other Builtin
-  command_center.add({
-    {
-      description = "Show treesitter symbols",
-      command = "Telescope treesitter",
-      keybindings = { "n", "<leader>sts", noremap}
-    }
-  })
-end
+    -- File Pickers
+    command_center.add({
+      {
+        description = "Find files",
+        cmd = "<CMD>Telescope find_files<CR>",
+        keybindings = { "n", "<leader>ff", noremap },
+      }, {
+        description = "Find hidden files",
+        cmd = "<CMD>Telescope find_files hidden=true<CR>",
+      }, {
+        description = "Find string in workspace (Live grep)",
+        cmd = "<CMD>Telescope live_grep<CR>",
+        keybindings = { "n", "<leader>fg", noremap },
+      }
+    })
+
+    -- Vim Pickers
+    command_center.add({
+      {
+        description = "Find help documentations",
+        cmd = "<CMD>Telescope help_tags<CR>",
+        keybindings = { "n", "<leader>fh", noremap },
+      }, {
+        description = "Show opened buffers",
+        cmd = "<CMD>Telescope buffers<CR>",
+        keybindings = { "n", "<leader>fb", noremap },
+      }, {
+        description = "Find man pages",
+        cmd = "<CMD>Telescope man_pages<CR>",
+        keybindings = { "n", "<leader>fm", noremap },
+      }, {
+        description = "Find key maps",
+        cmd = "<CMD>Telescope keymaps<CR>",
+        keybindings = { "n", "<leader>fk", noremap },
+      }, {
+        description = "Find string in current buffer",
+        cmd = "<CMD>Telescope current_buffer_fuzzy_find<CR>",
+        keybindings = { "n", "<leader>fl", noremap },
+      }, {
+        description = "Show registers",
+        cmd = "<CMD>Telescope registers<CR>",
+        keybindings = { "n", "<leader>fr", noremap },
+      }, {
+        description = "Show recent files",
+        cmd = "<CMD>Telescope oldfiles<CR>",
+      }, {
+        description = "Show all commands",
+        cmd = "<CMD>Telescope commands<CR>",
+      }, {
+        description = "Show command history",
+        cmd = "<CMD>Telescope command_history<CR>",
+      }, {
+        description = "Show search history (vimgrep)",
+        cmd = "<CMD>Telescope search_history<CR>",
+      }, {
+        description = "Switch colorschemes",
+        cmd = "<CMD>Telescope colorscheme<CR>",
+      }, {
+        description = "Show jumplist",
+        cmd = "<CMD>Telescope jumplist<CR>",
+      }, {
+        description = "Edit vim options",
+        cmd = "<CMD>Telescope vim_options<CR>",
+      }, {
+        description = "Show autocommands",
+        cmd = "<CMD>Telescope autocommands<CR>",
+      }, {
+        description = "Show telescope builtin commands",
+        cmd = "<CMD>Telescope builtin<CR>",
+      }
+    })
+
+    -- Git Pickers
+    command_center.add({
+      {
+        description = "Show workspace git commits",
+        cmd = "<CMD>Telescope git_commits<CR>",
+      -- }, {
+      --   description = "Show git commits of current buffer",
+      --   cmd = "<CMD>Telescope git_bcommits<CR>",
+      -- }, {
+      --   description = "Show git status",
+      --   cmd = "<CMD>Telescope git_status<CR>",
+      }, {
+        description = "Show git branches",
+        cmd = "<CMD>Telescope <CR>",
+      }, {
+        description = "Show git stash",
+        cmd = "<CMD>Telescope git_stash<CR>",
+      }
+    })
+
+  end
+}
 
 return M
